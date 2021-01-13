@@ -69,6 +69,10 @@ namespace pro {
 
         public:
             using iterator_category = std::forward_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+            using value_type = T;
+            using pointer = value_type*;
+            using reference = value_type&;
 
             iterator() = default;
 
@@ -85,6 +89,10 @@ namespace pro {
 
         public:
             using iterator_category = std::forward_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+            using value_type = T;
+            using pointer = const value_type*;
+            using reference = const value_type&;
 
             const_iterator() = default;
 
@@ -120,6 +128,9 @@ namespace pro {
 
         template<class Arg>
         auto emplace_back(Arg&& val) -> iterator;
+
+        template<class Arg>
+        auto push_back(Arg&& val) -> iterator;
 
         template<class It>
         auto erase(It it) -> iterator;
@@ -236,13 +247,14 @@ namespace pro {
     }
 
     template<class T, class Alloc>
-    list<T, Alloc>::list(const list& rhs)
-        : list(rhs.size()) {
-        std::copy(rhs.begin(), rhs.end(), this->begin());
+    list<T, Alloc>::list(const list& rhs) {
+        p_init();
+        std::copy(rhs.begin(), rhs.end(), std::back_inserter(*this));
     }
 
     template<class T, class Alloc>
     list<T, Alloc>::list(list&& rhs) {
+        p_init();
         std::move(rhs.begin(), rhs.end(), std::back_inserter(*this));
     }
 
@@ -285,11 +297,9 @@ namespace pro {
 
     template<class T, class Alloc>
     void list<T, Alloc>::clear() {
-        iterator bak;
-        for (auto it = begin(); it != end();) {
-            bak = it + 1;
-            delete it.m_node;
-            it = bak;
+        iterator it = begin();
+        while(size() != 0){
+            it = erase(it);
         }
         this->m_begin = m_pre_end = m_end;
         this->m_size = 0;
@@ -354,6 +364,12 @@ namespace pro {
         m_pre_end = n;
         m_size++;
         return iterator(n);
+    }
+
+    template<class T, class Alloc>
+    template<class Arg>
+    auto list<T, Alloc>::push_back(Arg&& val) -> iterator {
+        return emplace_back(std::forward<Arg>(val));
     }
 
     template<class T, class Alloc>

@@ -146,6 +146,7 @@ namespace intermediate {
 
     template<class T>
     list<T>::list(const list& rhs) {
+        p_init();
         for (auto& val : rhs) {
             emplace_back(val);
         }
@@ -153,6 +154,7 @@ namespace intermediate {
 
     template<class T>
     list<T>::list(list&& rhs) {
+        p_init();
         for (auto&& val : rhs) {
             emplace_back(std::move(val));
         }
